@@ -4,7 +4,7 @@ const path = require('path');
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require('socket.io');
-const { addUser, getUsersInRoom, getUser } = require('./utils/users');
+const { addUser, getUsersInRoom, getUser, removeUser } = require('./utils/users');
 const { generateMessage } = require('./utils/messages');
 const io = new Server(server);
 
@@ -23,7 +23,7 @@ io.on('connection', (socket) => {
     socket.join(user.room);
 
     socket.emit('message', generateMessage('Admin', `${user.room}방에 오신 걸 환영합니다`))
-    socket.broadcast.to(user.room).emit('message', generateMessage('', `${user.username}님이 방에 참여했습니다`))
+    socket.broadcast.to(user.room).emit('message', generateMessage('Admin', `${user.username}님이 방에 참여했습니다`))
 
     io.to(user.room).emit('roomData', {
       room: user.room,
@@ -39,8 +39,18 @@ io.on('connection', (socket) => {
 
   });
 
-  
-  socket.on('disconnect', () => {});
+
+  socket.on('disconnect', () => {
+    const user = removeUser(socket.id);
+    
+    if (user) {
+      io.to(user.room).emit('message', generateMessage('Admin', `${user.username}님이 방을 나갔습니다`))
+      io.to(user.room).emit('roomData', {
+        room: user.room,
+        users: getUsersInRoom(user.room)
+      })
+    }
+  });
 })
 
 

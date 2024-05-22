@@ -50,7 +50,6 @@ messageForm.addEventListener('submit', (e) => {
   e.preventDefault();
 
   messageFormButton.setAttribute('disabled','disabled');
-  console.log(1)
   const message = e.target.elements.message.value;
 
   socket.emit('sendMessage', message, (error) => {
