@@ -4,7 +4,7 @@ const path = require('path');
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require('socket.io');
-const { addUser } = require('./utils/users');
+const { addUser, getUsersInRoom } = require('./utils/users');
 const { generateMessage } = require('./utils/messages');
 const io = new Server(server);
 
@@ -16,6 +16,7 @@ io.on('connection', (socket) => {
 
   socket.on('join', (option, callback) => {
     const { error, user } = addUser({id: socket.id, ...option})
+    
     if (error) {
       return callback(error)
     }
